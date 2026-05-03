@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farcle</title>
+  <link rel="stylesheet" href="styles.css?v=18">
+</head>
+<body>
+  <div class="special-banner" id="specialBanner"></div>
+  <button class="sound-fab" id="soundToggle" type="button">Zvuk: ukljucen</button>
+  <section class="mode-screen" id="modeScreen">
+    <div class="mode-shell">
+      <div class="subtitle">Farcle</div>
+      <div class="mode-title">
+        <h1>Izaberi partiju</h1>
+        <input id="playerNameInput" maxlength="18" autocomplete="off" placeholder="Tvoje ime">
+      </div>
+      <div class="mode-actions">
+        <button class="mode-card" id="aiModeBtn" type="button">
+          <span>Protiv AI</span>
+          <strong>Pokreni igru</strong>
+        </button>
+        <button class="mode-card" id="multiplayerModeBtn" type="button">
+          <span>Multiplayer</span>
+          <strong>Napravi ili udji u sobu</strong>
+        </button>
+      </div>
+      <div class="mp-panel" id="mpPanel" hidden>
+        <div class="mp-fields">
+          <input id="roomNameInput" maxlength="28" autocomplete="off" placeholder="Ime sobe">
+        </div>
+        <div class="mp-row">
+          <label class="select-box">
+            <span>Igraci</span>
+            <select id="maxPlayersSelect">
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4" selected>4</option>
+            </select>
+          </label>
+          <button class="primary" id="createRoomBtn" type="button">Napravi sobu</button>
+          <button class="secondary" id="findRoomBtn" type="button">Pronadji sobu</button>
+          <div class="join-box">
+            <input id="roomCodeInput" maxlength="5" autocomplete="off" placeholder="Kod sobe">
+            <button class="secondary" id="joinRoomBtn" type="button">Udji</button>
+          </div>
+        </div>
+        <div class="room-results" id="roomResults" hidden></div>
+        <div class="room-status" id="roomStatusText">Napravi sobu ili unesi kod koji ti je poslao drugi igrac.</div>
+      </div>
+    </div>
+  </section>
+
+  <main class="app" id="gameApp" hidden>
+    <section class="top">
+      <div class="game-menu">
+        <button class="secondary menu-button" id="resetBtn">Nova partija</button>
+        <button class="secondary menu-button" id="rulesBtn" type="button">Pravila</button>
+        <button class="secondary menu-button" id="howToBtn" type="button">Kako se igra</button>
+        <button class="danger menu-button" id="leaveRoomBtn" hidden>Izlaz</button>
+      </div>
+      <div>
+        <div class="subtitle">Farcle za 2-4 igraca</div>
+        <h1>Farcle</h1>
+      </div>
+      <div class="version-badge">
+        <span>Verzija</span>
+        <strong id="appVersionText">v18</strong>
+      </div>
+      <button class="primary" id="startRoomBtn" type="button" hidden>Start</button>
+      <div class="goalbox">
+        <span>Cilj</span>
+        <strong>10000</strong>
+      </div>
+      <div class="room-badge" id="roomBadge" hidden>
+        <span>Soba</span>
+        <strong id="roomCodeText">-----</strong>
+      </div>
+    </section>
+
+    <section class="players" id="playersList"></section>
+
+    <section class="board">
+      <div class="status">
+        <div id="turnText">Na potezu: Igrac 1</div>
+        <div>
+          Runda: <strong id="turnPoints">0</strong> |
+          Izabrano: <strong id="selectedPoints">0</strong> |
+          Za bacanje: <strong id="diceLeft">6</strong> |
+          Vreme: <strong id="turnTimer">60</strong>s
+        </div>
+      </div>
+
+      <div class="dice-wrap" id="diceWrap"></div>
+
+      <div class="controls">
+        <div class="left-controls">
+          <button class="primary" id="rollBtn">Baci</button>
+          <button class="secondary" id="keepBtn">Sacuvaj izabrano</button>
+          <button class="secondary" id="bankBtn">Zavrsi potez</button>
+        </div>
+        <div id="messageText">Baci 6 kockica da zapocnes potez.</div>
+      </div>
+
+      <div class="panels">
+        <section class="panel">
+          <h3>Istorija</h3>
+          <div class="history-list" id="historyList"></div>
+        </section>
+        <section class="panel chat-panel" id="chatPanel" hidden>
+          <h3>Chat</h3>
+          <div class="chat-list" id="chatList"></div>
+          <form class="chat-form" id="chatForm">
+            <input id="chatInput" maxlength="180" autocomplete="off" placeholder="Poruka">
+            <button class="secondary" type="submit">Posalji</button>
+          </form>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="infoModal" hidden>
+    <section class="modal-window" role="dialog" aria-modal="true" aria-labelledby="infoModalTitle">
+      <div class="modal-head">
+        <h2 id="infoModalTitle">Pravila</h2>
+        <button class="secondary modal-close" id="infoModalClose" type="button">Zatvori</button>
+      </div>
+      <div class="rules-list" id="rulesModalContent">
+        <div class="rules-item"><span>Cilj je preci 10000 poena i ostati ispred kada ostali igraci zavrse odgovor.</span></div>
+        <div class="rules-item"><span>U potezu bacas kockice, biras bodovne kockice, cuvas ih, pa odlucujes da li nastavljas ili upisujes poene.</span></div>
+        <div class="rules-item"><span>Jedinica vredi 100 poena. Petica vredi 50 poena.</span></div>
+        <div class="rules-item"><span>Tri jedinice vrede 1000. Tri iste od 2 do 6 vrede broj kockice puta 100.</span></div>
+        <div class="rules-item"><span>Cetiri, pet i sest istih dupliraju vrednost grupe: na primer 3 dvojke su 200, 4 dvojke 400, 5 dvojki 800.</span></div>
+        <div class="rules-item"><span>Kenta 1-2-3-4-5-6 vredi 1500 poena. Tri para vrede 750 poena.</span></div>
+        <div class="rules-item"><span>Mozes sacuvati samo validnu bodovnu kombinaciju. Kockice koje nisu bodovne ne mogu same da se cuvaju.</span></div>
+        <div class="rules-item"><span>Za zavrsetak poteza treba minimum 350 poena u toj rundi. Kada imas 9000 ili vise ukupno, minimum za upis je 1000.</span></div>
+        <div class="rules-item"><span>Ako sacuvas svih 6 kockica, dobijas novo bacanje sa svih 6, ali moras jos jednom da bacis i sacuvas bar jednu kockicu pre upisa.</span></div>
+        <div class="rules-item"><span>Ako bacanje nema nijednu bodovnu kockicu, to je Farkle: gubis poene iz trenutne runde i potez prelazi dalje.</span></div>
+        <div class="rules-item"><span>Svaki Farkle daje crticu. Tri crtice skidaju 1000 poena. Uspesan upis poteza brise crtice.</span></div>
+        <div class="rules-item"><span>Preko 9000 ukupnih poena nema crtica i ne skida se 1000 poena za Farkle.</span></div>
+        <div class="rules-item"><span>Kada neko predje 10000, sledeci igrac dobija sansu da ga stigne ili prestigne. Ako ga stigne, igra se nastavlja i novi lider ceka odgovor.</span></div>
+        <div class="rules-item"><span>Pobednik se proglasava tek kada igrac koji odgovara zavrsi potez i ostane iza trenutnog lidera.</span></div>
+      </div>
+      <div class="rules-list" id="howToModalContent" hidden>
+        <div class="rules-item"><span>Klikni Baci. Posle bacanja klikni kockice koje zelis da sacuvas.</span></div>
+        <div class="rules-item"><span>Bronzane kockice su pojedinacne jedinice ili petice. Zlatne kockice su grupe od tri ili vise istih.</span></div>
+        <div class="rules-item"><span>Crvene kockice su trenutno izabrane. Klikni Sacuvaj izabrano da ih dodas u rundu.</span></div>
+        <div class="rules-item"><span>Posle cuvanja biras: Baci ponovo za jos poena ili Zavrsi potez da upises rundu u ukupan skor.</span></div>
+        <div class="rules-item"><span>Ne mozes da zavrsis potez dok runda nema bar 350 poena, odnosno 1000 ako si na 9000 ili vise ukupno.</span></div>
+        <div class="rules-item"><span>Ako ne sacuvas izabrane kockice, ne mozes da bacas dalje. Prvo ih sacuvaj ili odznaci.</span></div>
+        <div class="rules-item"><span>Ako iskoristis svih 6 kockica, tabla se prazni i sledece bacanje opet koristi svih 6 kockica.</span></div>
+        <div class="rules-item"><span>U multiplayeru host pravi sobu, bira 2-4 igraca i salje kod. Ostali mogu da unesu kod ili kliknu Pronadji sobu.</span></div>
+        <div class="rules-item"><span>Partija ne krece dok host ne klikne Start. Dok je soba u cekanju, timer ne istice.</span></div>
+        <div class="rules-item"><span>U multiplayeru svaki aktivan potez ima 60 sekundi. Timer se resetuje kada sacuvas kockice ili kada potez predje na sledeceg igraca.</span></div>
+        <div class="rules-item"><span>Ako vreme istekne, potez se zavrsava sa 0 poena i dobijas AFK opomenu. Posle 2 AFK opomene AI preuzima tog igraca.</span></div>
+        <div class="rules-item"><span>Dugme Izlaz u multiplayeru znaci predaju partije. Protivnik dobija pobedu.</span></div>
+        <div class="rules-item"><span>Chat je u donjem panelu i radi dok si u multiplayer sobi.</span></div>
+      </div>
+    </section>
+  </div>
+  <script src="game.js?v=18"></script>
+</body>
+</html>
+
