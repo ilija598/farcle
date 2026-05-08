@@ -23,7 +23,8 @@ Project notes for the browser dice game. The frontend is static (`index.html`, `
 
 - `index.html` - markup, landing screen, game screen, modals, controls.
 - `styles.css` - full UI styling, responsive layout, animations.
-- `game.js` - game rules, UI logic, language switching, AI, sounds, multiplayer polling, session restore.
+- `game.js` - game rules, UI logic, language switching, sounds, multiplayer polling, session restore.
+- `ai.js` - AI selection and banking decisions.
 - `README.md` - this project note.
 - `assets/sounds/` - MP3 sounds.
 - `api/` - PHP backend.
@@ -101,6 +102,7 @@ Upload:
 
 - `index.html`
 - `styles.css`
+- `ai.js`
 - `game.js`
 - `assets/sounds/`
 - `api/*.php`
@@ -117,11 +119,12 @@ Important: `api/config.local.php` must stay on the server with the real DB crede
 
 Current cache-busted frontend version:
 
-- `styles.css?v=24`
-- `game.js?v=24`
-- header version: `v24`
+- `styles.css?v=25`
+- `ai.js?v=25`
+- `game.js?v=25`
+- header version: `v25`
 
-`index.html` and `game.js` must be deployed together. If new HTML and old JS get mixed by cache, null DOM errors can happen.
+`index.html`, `ai.js`, and `game.js` must be deployed together. If new HTML and old JS get mixed by cache, null DOM errors can happen.
 
 ## Multiplayer Flow
 
@@ -215,7 +218,7 @@ Browser autoplay:
 - AI banking considers score, dice left, and endgame state.
 - AI can chase a 10000+ opponent.
 - In multiplayer, AI can take over after 2 AFK strikes.
-- AI code is still inside `game.js`; the next cleanup step is to extract it into a separate `ai.js`.
+- AI decision logic is isolated in `ai.js`; `game.js` only schedules and executes AI actions.
 
 ## Implementation Notes
 

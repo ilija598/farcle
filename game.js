@@ -87,7 +87,7 @@ const modeScreen = document.getElementById("modeScreen");
     const aiPostRollSelectionDelay = 900;
     const multiplayerPollDelay = 1200;
     const turnDurationMs = 60000;
-    const appVersion = "v24";
+    const appVersion = "v25";
     const i18n = {
       en: {
         langButton: "EN",
@@ -1920,95 +1920,39 @@ const modeScreen = document.getElementById("modeScreen");
       }
     }
 
-    function getDiceSubsets(diceList) {
-      const subsets = [];
-      const maxMask = 2 ** diceList.length;
-      for (let mask = 1; mask < maxMask; mask += 1) {
-        const subset = [];
-        for (let index = 0; index < diceList.length; index += 1) {
-          if (mask & (1 << index)) subset.push(diceList[index]);
-        }
-        subsets.push(subset);
-      }
-      return subsets;
+    function getAiStateSnapshot() {
+      return {
+        players: players.map((player) => ({
+          score: player.score,
+          strikes: player.strikes || 0
+        })),
+        currentPlayer,
+        turnPoints,
+        activeDice: getActiveDice().map((die) => ({ ...die })),
+        mustKeepAfterFullReset
+      };
     }
 
-    function rateAiSelection(selection, result, activeDiceCount) {
-      const remainingDice = activeDiceCount - selection.length;
-      let rating = result.points;
-      const player = players[currentPlayer];
-      const bestOpponentScore = Math.max(...players.map((item, index) => index === currentPlayer ? 0 : item.score));
-
-      if (remainingDice === 0) rating += 260;
-      if (remainingDice >= 3) rating += remainingDice * 18;
-      if (selection.length === 1 && result.points < 100) rating -= 35;
-      if (turnPoints + result.points >= getRequiredBankPoints(player)) rating += 80;
-      if (player.score >= highScoreThreshold && turnPoints + result.points >= highScoreBankMinimum) rating += 160;
-      if (bestOpponentScore >= 10000 && player.score + turnPoints + result.points >= bestOpponentScore) rating += 320;
-      if (player.score < bestOpponentScore && player.score + turnPoints + result.points > bestOpponentScore) rating += 140;
-
-      return rating;
+    function getAiRules() {
+      return {
+        standardBankMinimum,
+        highScoreThreshold,
+        highScoreBankMinimum
+      };
     }
 
     function chooseAiSelection(activeDice) {
-      let bestChoice = null;
-
-      for (const subset of getDiceSubsets(activeDice)) {
-        const result = scoreSelection(subset);
-        if (!result.valid) continue;
-
-        const rating = rateAiSelection(subset, result, activeDice.length);
-        if (
-          !bestChoice ||
-          rating > bestChoice.rating ||
-          (rating === bestChoice.rating && result.points > bestChoice.points) ||
-          (rating === bestChoice.rating && result.points === bestChoice.points && subset.length > bestChoice.length)
-        ) {
-          bestChoice = {
-            ids: subset.map((die) => die.id),
-            length: subset.length,
-            points: result.points,
-            rating
-          };
-        }
-      }
-
-      return bestChoice ? bestChoice.ids : [];
+      if (!window.FarcleAi) return [];
+      return window.FarcleAi.chooseSelection(
+        { ...getAiStateSnapshot(), activeDice },
+        getAiRules(),
+        scoreSelection
+      ).ids;
     }
 
     function shouldAiBank() {
-      if (mustKeepAfterFullReset) return false;
-      const player = players[currentPlayer];
-      if (turnPoints < getRequiredBankPoints(player)) return false;
-      const totalScore = player.score;
-      const projectedScore = totalScore + turnPoints;
-      const diceLeft = getActiveDice().length;
-      const bestOpponentScore = Math.max(...players.map((item, index) => index === currentPlayer ? 0 : item.score));
-
-      if (bestOpponentScore >= 10000 && projectedScore >= bestOpponentScore) return true;
-      if (projectedScore >= 10000 && turnPoints >= getRequiredBankPoints(player)) return true;
-      if (totalScore >= highScoreThreshold && turnPoints >= highScoreBankMinimum) return true;
-      if (player.strikes >= 2 && turnPoints >= 500) return true;
-      if (bestOpponentScore - totalScore >= 2500 && turnPoints < 900 && diceLeft >= 3) return false;
-
-      if (totalScore < 3500) {
-        if (turnPoints >= 1100) return true;
-        if (turnPoints >= 800 && diceLeft <= 3) return true;
-        if (turnPoints >= 550 && diceLeft <= 1) return true;
-        return false;
-      }
-
-      if (totalScore < 8000) {
-        if (turnPoints >= 900) return true;
-        if (turnPoints >= 650 && diceLeft <= 3) return true;
-        if (turnPoints >= 450 && diceLeft <= 2) return true;
-        return false;
-      }
-
-      if (turnPoints >= 700) return true;
-      if (turnPoints >= 500 && diceLeft <= 3) return true;
-      if (turnPoints >= getRequiredBankPoints(player) && diceLeft <= 2) return true;
-      return false;
+      if (!window.FarcleAi) return false;
+      return window.FarcleAi.shouldBank(getAiStateSnapshot(), getAiRules());
     }
 
     function toggleDieSelection(die) {
