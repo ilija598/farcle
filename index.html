@@ -1,53 +1,67 @@
 ﻿<!DOCTYPE html>
-<html lang="sr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Farcle</title>
-  <link rel="stylesheet" href="styles.css?v=18">
+  <link rel="stylesheet" href="styles.css?v=24">
 </head>
 <body>
   <div class="special-banner" id="specialBanner"></div>
-  <button class="sound-fab" id="soundToggle" type="button">Zvuk: ukljucen</button>
   <section class="mode-screen" id="modeScreen">
     <div class="mode-shell">
-      <div class="subtitle">Farcle</div>
+      <div class="mode-head">
+        <div class="subtitle">Farcle</div>
+        <button class="sound-toggle" id="soundToggle" type="button" aria-label="Sound on" title="Sound on">
+          <svg class="sound-icon sound-on" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 9v6h4l6 5V4L7 9H3z"></path>
+            <path d="M16 8.5a5 5 0 0 1 0 7"></path>
+            <path d="M18.8 5.8a9 9 0 0 1 0 12.4"></path>
+          </svg>
+          <svg class="sound-icon sound-off" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 9v6h4l6 5V4L7 9H3z"></path>
+            <path d="M17 9l5 5"></path>
+            <path d="M22 9l-5 5"></path>
+          </svg>
+        </button>
+        <button class="language-toggle" id="langToggle" type="button">EN</button>
+      </div>
       <div class="mode-title">
-        <h1>Izaberi partiju</h1>
-        <input id="playerNameInput" maxlength="18" autocomplete="off" placeholder="Tvoje ime">
+        <h1>Choose game</h1>
+        <input id="playerNameInput" maxlength="18" autocomplete="off" placeholder="Your name">
       </div>
       <div class="mode-actions">
         <button class="mode-card" id="aiModeBtn" type="button">
-          <span>Protiv AI</span>
-          <strong>Pokreni igru</strong>
+          <span>Vs AI</span>
+          <strong>Start game</strong>
         </button>
         <button class="mode-card" id="multiplayerModeBtn" type="button">
           <span>Multiplayer</span>
-          <strong>Napravi ili udji u sobu</strong>
+          <strong>Create or join a room</strong>
         </button>
       </div>
       <div class="mp-panel" id="mpPanel" hidden>
         <div class="mp-fields">
-          <input id="roomNameInput" maxlength="28" autocomplete="off" placeholder="Ime sobe">
+          <input id="roomNameInput" maxlength="28" autocomplete="off" placeholder="Room name">
         </div>
         <div class="mp-row">
           <label class="select-box">
-            <span>Igraci</span>
+            <span>Players</span>
             <select id="maxPlayersSelect">
               <option value="2">2</option>
               <option value="3">3</option>
               <option value="4" selected>4</option>
             </select>
           </label>
-          <button class="primary" id="createRoomBtn" type="button">Napravi sobu</button>
-          <button class="secondary" id="findRoomBtn" type="button">Pronadji sobu</button>
+          <button class="primary" id="createRoomBtn" type="button">Create room</button>
+          <button class="secondary" id="findRoomBtn" type="button">Find room</button>
           <div class="join-box">
-            <input id="roomCodeInput" maxlength="5" autocomplete="off" placeholder="Kod sobe">
-            <button class="secondary" id="joinRoomBtn" type="button">Udji</button>
+            <input id="roomCodeInput" maxlength="5" autocomplete="off" placeholder="Room code">
+            <button class="secondary" id="joinRoomBtn" type="button">Join</button>
           </div>
         </div>
         <div class="room-results" id="roomResults" hidden></div>
-        <div class="room-status" id="roomStatusText">Napravi sobu ili unesi kod koji ti je poslao drugi igrac.</div>
+        <div class="room-status" id="roomStatusText">Create a room or enter a code from another player.</div>
       </div>
     </div>
   </section>
@@ -55,26 +69,39 @@
   <main class="app" id="gameApp" hidden>
     <section class="top">
       <div class="game-menu">
-        <button class="secondary menu-button" id="resetBtn">Nova partija</button>
-        <button class="secondary menu-button" id="rulesBtn" type="button">Pravila</button>
-        <button class="secondary menu-button" id="howToBtn" type="button">Kako se igra</button>
-        <button class="danger menu-button" id="leaveRoomBtn" hidden>Izlaz</button>
+        <button class="secondary menu-button" id="resetBtn">New game</button>
+        <button class="secondary menu-button" id="rulesBtn" type="button">Rules</button>
+        <button class="secondary menu-button" id="howToBtn" type="button">How to play</button>
+        <button class="danger menu-button" id="leaveRoomBtn" hidden>Exit</button>
+        <button class="sound-toggle menu-sound-toggle" id="soundToggleGame" type="button" aria-label="Sound on" title="Sound on">
+          <svg class="sound-icon sound-on" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 9v6h4l6 5V4L7 9H3z"></path>
+            <path d="M16 8.5a5 5 0 0 1 0 7"></path>
+            <path d="M18.8 5.8a9 9 0 0 1 0 12.4"></path>
+          </svg>
+          <svg class="sound-icon sound-off" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 9v6h4l6 5V4L7 9H3z"></path>
+            <path d="M17 9l5 5"></path>
+            <path d="M22 9l-5 5"></path>
+          </svg>
+        </button>
+        <button class="language-toggle menu-language-toggle" id="langToggleGame" type="button">EN</button>
       </div>
       <div>
-        <div class="subtitle">Farcle za 2-4 igraca</div>
+        <div class="subtitle">Farcle for 2-4 players</div>
         <h1>Farcle</h1>
       </div>
       <div class="version-badge">
-        <span>Verzija</span>
-        <strong id="appVersionText">v18</strong>
+        <span>Version</span>
+        <strong id="appVersionText">v24</strong>
       </div>
       <button class="primary" id="startRoomBtn" type="button" hidden>Start</button>
       <div class="goalbox">
-        <span>Cilj</span>
+        <span>Goal</span>
         <strong>10000</strong>
       </div>
       <div class="room-badge" id="roomBadge" hidden>
-        <span>Soba</span>
+        <span>Room</span>
         <strong id="roomCodeText">-----</strong>
       </div>
     </section>
@@ -83,12 +110,12 @@
 
     <section class="board">
       <div class="status">
-        <div id="turnText">Na potezu: Igrac 1</div>
-        <div>
-          Runda: <strong id="turnPoints">0</strong> |
-          Izabrano: <strong id="selectedPoints">0</strong> |
-          Za bacanje: <strong id="diceLeft">6</strong> |
-          Vreme: <strong id="turnTimer">60</strong>s
+        <div id="turnText">Turn: Player 1</div>
+        <div id="statusMeta">
+          Round: <strong id="turnPoints">0</strong> |
+          Selected: <strong id="selectedPoints">0</strong> |
+          To roll: <strong id="diceLeft">6</strong> |
+          Time: <strong id="turnTimer">60</strong>s
         </div>
       </div>
 
@@ -96,24 +123,35 @@
 
       <div class="controls">
         <div class="left-controls">
-          <button class="primary" id="rollBtn">Baci</button>
-          <button class="secondary" id="keepBtn">Sacuvaj izabrano</button>
-          <button class="secondary" id="bankBtn">Zavrsi potez</button>
+          <button class="primary" id="rollBtn">Roll</button>
+          <button class="secondary" id="keepBtn">Keep selected</button>
+          <button class="secondary" id="bankBtn">End turn</button>
         </div>
-        <div id="messageText">Baci 6 kockica da zapocnes potez.</div>
+        <div id="messageText">Roll 6 dice to start your turn.</div>
       </div>
+
+      <section class="test-panel" id="testPanel" hidden>
+        <div class="test-panel-head">
+          <div>
+            <span>Admin testing</span>
+            <strong>Set dice roll</strong>
+          </div>
+          <button class="secondary" id="testExitBtn" type="button">Exit test</button>
+        </div>
+        <div class="test-grid" id="testGrid"></div>
+      </section>
 
       <div class="panels">
         <section class="panel">
-          <h3>Istorija</h3>
+          <h3>History</h3>
           <div class="history-list" id="historyList"></div>
         </section>
         <section class="panel chat-panel" id="chatPanel" hidden>
           <h3>Chat</h3>
           <div class="chat-list" id="chatList"></div>
           <form class="chat-form" id="chatForm">
-            <input id="chatInput" maxlength="180" autocomplete="off" placeholder="Poruka">
-            <button class="secondary" type="submit">Posalji</button>
+            <input id="chatInput" maxlength="180" autocomplete="off" dir="ltr" inputmode="text" enterkeyhint="send" placeholder="Message">
+            <button class="secondary" type="submit">Send</button>
           </form>
         </section>
       </div>
@@ -123,8 +161,8 @@
   <div class="modal-backdrop" id="infoModal" hidden>
     <section class="modal-window" role="dialog" aria-modal="true" aria-labelledby="infoModalTitle">
       <div class="modal-head">
-        <h2 id="infoModalTitle">Pravila</h2>
-        <button class="secondary modal-close" id="infoModalClose" type="button">Zatvori</button>
+        <h2 id="infoModalTitle">Rules</h2>
+        <button class="secondary modal-close" id="infoModalClose" type="button">Close</button>
       </div>
       <div class="rules-list" id="rulesModalContent">
         <div class="rules-item"><span>Cilj je preci 10000 poena i ostati ispred kada ostali igraci zavrse odgovor.</span></div>
@@ -159,7 +197,20 @@
       </div>
     </section>
   </div>
-  <script src="game.js?v=18"></script>
+
+  <div class="modal-backdrop result-backdrop" id="resultModal" hidden>
+    <section class="modal-window result-window" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+      <div class="result-kicker" id="resultKicker">Game over</div>
+      <h2 id="resultTitle">Victory</h2>
+      <p id="resultText"></p>
+      <div class="result-scores" id="resultScores"></div>
+      <div class="result-actions">
+        <button class="primary" id="resultPrimaryBtn" type="button">New game</button>
+        <button class="secondary" id="resultSecondaryBtn" type="button">Exit</button>
+      </div>
+    </section>
+  </div>
+  <script src="game.js?v=24"></script>
 </body>
 </html>
 

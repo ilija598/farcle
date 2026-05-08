@@ -2,7 +2,10 @@ const modeScreen = document.getElementById("modeScreen");
     const gameApp = document.getElementById("gameApp");
     const aiModeBtn = document.getElementById("aiModeBtn");
     const multiplayerModeBtn = document.getElementById("multiplayerModeBtn");
-    const soundToggle = document.getElementById("soundToggle");
+    const soundToggleButtons = [
+      document.getElementById("soundToggle"),
+      document.getElementById("soundToggleGame")
+    ].filter(Boolean);
     const mpPanel = document.getElementById("mpPanel");
     const createRoomBtn = document.getElementById("createRoomBtn");
     const findRoomBtn = document.getElementById("findRoomBtn");
@@ -31,6 +34,7 @@ const modeScreen = document.getElementById("modeScreen");
     const selectedPointsEl = document.getElementById("selectedPoints");
     const diceLeftEl = document.getElementById("diceLeft");
     const turnTimerEl = document.getElementById("turnTimer");
+    const statusMeta = document.getElementById("statusMeta");
     const messageText = document.getElementById("messageText");
     const historyList = document.getElementById("historyList");
     const chatPanel = document.getElementById("chatPanel");
@@ -43,6 +47,20 @@ const modeScreen = document.getElementById("modeScreen");
     const rulesModalContent = document.getElementById("rulesModalContent");
     const howToModalContent = document.getElementById("howToModalContent");
     const specialBanner = document.getElementById("specialBanner");
+    const languageToggleButtons = [
+      document.getElementById("langToggle"),
+      document.getElementById("langToggleGame")
+    ].filter(Boolean);
+    const resultModal = document.getElementById("resultModal");
+    const resultKicker = document.getElementById("resultKicker");
+    const resultTitle = document.getElementById("resultTitle");
+    const resultText = document.getElementById("resultText");
+    const resultScores = document.getElementById("resultScores");
+    const resultPrimaryBtn = document.getElementById("resultPrimaryBtn");
+    const resultSecondaryBtn = document.getElementById("resultSecondaryBtn");
+    const testPanel = document.getElementById("testPanel");
+    const testGrid = document.getElementById("testGrid");
+    const testExitBtn = document.getElementById("testExitBtn");
 
     const pipMap = {
       1: [[50, 50]],
@@ -54,8 +72,8 @@ const modeScreen = document.getElementById("modeScreen");
     };
 
     let players = [
-      { name: "Igrac 1", score: 0, strikes: 0, timeoutStrikes: 0, aiControlled: false },
-      { name: "Igrac 2", score: 0, strikes: 0, timeoutStrikes: 0, aiControlled: false }
+      { name: "Player 1", score: 0, strikes: 0, timeoutStrikes: 0, aiControlled: false },
+      { name: "Player 2", score: 0, strikes: 0, timeoutStrikes: 0, aiControlled: false }
     ];
     let savedDiceValues = [[], []];
     let chatMessages = [];
@@ -69,7 +87,266 @@ const modeScreen = document.getElementById("modeScreen");
     const aiPostRollSelectionDelay = 900;
     const multiplayerPollDelay = 1200;
     const turnDurationMs = 60000;
-    const appVersion = "v18";
+    const appVersion = "v24";
+    const i18n = {
+      en: {
+        langButton: "EN",
+        soundOn: "Sound on",
+        soundOff: "Sound off",
+        chooseGame: "Choose game",
+        yourName: "Your name",
+        vsAi: "Vs AI",
+        startGame: "Start game",
+        multiplayer: "Multiplayer",
+        createJoinRoom: "Create or join a room",
+        roomName: "Room name",
+        players: "Players",
+        createRoom: "Create room",
+        findRoom: "Find room",
+        roomCode: "Room code",
+        join: "Join",
+        lobbyHelp: "Create a room or enter a code from another player.",
+        newGame: "New game",
+        rules: "Rules",
+        howTo: "How to play",
+        exit: "Exit",
+        subtitleGame: "Farcle for 2-4 players",
+        version: "Version",
+        goal: "Goal",
+        room: "Room",
+        turn: "Turn: {name}",
+        round: "Round",
+        selected: "Selected",
+        toRoll: "To roll",
+        time: "Time",
+        roll: "Roll",
+        keepSelected: "Keep selected",
+        endTurn: "End turn",
+        startMessage: "Roll 6 dice to start your turn.",
+        setDiceRoll: "Set dice roll",
+        exitTest: "Exit test",
+        history: "History",
+        message: "Message",
+        send: "Send",
+        close: "Close",
+        gameOver: "Game over",
+        mpGameOver: "Multiplayer game over",
+        victory: "Victory",
+        lost: "Lost",
+        rematch: "Rematch",
+        emptyHistory: "No turns played yet.",
+        noMessages: "No messages.",
+        total: "Total",
+        marks: "Marks",
+        savedDice: "Saved dice",
+        waitingPlayer: "Waiting for player {n}",
+        player: "Player {n}",
+        ai: "AI",
+        testMode: "Testing mode ACAB9: set dice rolls with the admin buttons.",
+        testApplied: "TEST: {label} ({values}).",
+        roomCreated: "Room {code} created. Waiting for players ({count}/{max}).",
+        waitStart: "Room {code} is waiting to start ({count}/{max}).",
+        waitOther: "Room {code}: waiting for another player.",
+        otherJoined: "Another player joined. Your turn.",
+        roomStarted: "Game started.",
+        restored: "Restored room {code}.",
+        finished: "Game is finished.",
+        restoring: "Restoring multiplayer room...",
+        restoreFailed: "Could not restore previous room.",
+        leftRoom: "You left the room.",
+        creatingRoom: "Creating room...",
+        enterCode: "Enter a room code.",
+        searchingRooms: "Searching open rooms...",
+        chooseRoom: "Choose a room from the list.",
+        noRooms: "No open rooms.",
+        joiningRoom: "Joining room...",
+        joinedRoom: "Joined room {code}. Waiting for start.",
+        testingStarted: "Testing mode ACAB9 started against AI.",
+        roomPlayers: "{code} | {count}/{max} players",
+        invalidFirst: "Keep selected dice first, or deselect them.",
+        allDiceBack: "You used all dice. All 6 are back.",
+        chooseScoring: "Choose scoring dice to keep.",
+        invalidSelection: "Selected dice are not a valid scoring combination.",
+        allSaved: "You kept all dice. Roll all 6 again.",
+        keptPoints: "Kept {points} points. {remaining} dice left.",
+        minBank: "You need at least {points} points to end the turn.",
+        mustRollAfterAll: "After keeping all 6 dice, you must roll and keep at least one die before banking.",
+        banked: "{name} banked {points} points.",
+        playerRolls: "{name} rolls 6 dice.",
+        kentaAuto: "Straight is kept automatically. Roll all 6 again.",
+        pairsAuto: "Three pairs are kept automatically. Roll all 6 again.",
+        winner: "{name} won with {points} points.",
+        winnerText: "{name} won with {points} points.",
+        loserText: "{name} won. Your score is {points}.",
+        noScoring: "{name} has no scoring dice.",
+        noMarksOver9000: " No marks over 9000.",
+        threeMarks: " Three marks: -1000 points.",
+        gotMark: " Got a mark.",
+        farkleHistory: "{name}: Farkle",
+        bankHistory: "{name}: banked turn",
+        timeoutDone: "60 seconds expired. Turn ended.",
+        rulesList: [
+          "Goal: pass 10000 points and stay ahead after the other players get their answer turn.",
+          "On your turn you roll dice, choose scoring dice, keep them, then decide whether to continue or bank points.",
+          "A single 1 is worth 100 points. A single 5 is worth 50 points.",
+          "Three 1s are worth 1000. Three of any number from 2 to 6 are worth that number times 100.",
+          "Four, five and six of a kind double the group value: for example, three 2s are 200, four 2s are 400, five 2s are 800.",
+          "A straight 1-2-3-4-5-6 is worth 1500. Three pairs are worth 750.",
+          "You can only keep a valid scoring combination. Non-scoring dice cannot be kept alone.",
+          "To end a turn you need at least 350 points this round. Once your total is 9000 or more, the minimum bank is 1000.",
+          "If you keep all 6 dice, you get a fresh roll with all 6, but you must roll and keep at least one die before banking.",
+          "If a roll has no scoring dice, it is a Farkle: you lose the round points and the turn passes.",
+          "Each Farkle gives a mark. Three marks remove 1000 points. A successful bank clears marks.",
+          "Over 9000 total points there are no Farkle marks and no -1000 penalty.",
+          "When someone passes 10000, the next player gets a chance to catch or beat them. If they do, play continues and the new leader waits for an answer.",
+          "The winner is declared only when the answering player finishes behind the current leader."
+        ],
+        howList: [
+          "Click Roll. After the roll, click the dice you want to keep.",
+          "Bronze dice are single 1s or 5s. Gold dice are groups of three or more.",
+          "Red dice are currently selected. Click Keep selected to add them to the round.",
+          "After keeping dice, choose: roll again for more points or end the turn to bank the round.",
+          "You cannot end the turn until the round has at least 350 points, or 1000 if your total is 9000 or more.",
+          "If selected dice are not kept, you cannot roll again. Keep them first or deselect them.",
+          "If you use all 6 dice, the table clears and the next roll uses all 6 dice again.",
+          "In multiplayer, the host creates a room, chooses 2-4 players and shares the code. Others can enter the code or click Find room.",
+          "The game does not start until the host clicks Start. While the room is waiting, the timer does not run.",
+          "In multiplayer, each active turn has 60 seconds. The timer resets when you keep dice or when the turn passes.",
+          "If time expires, the turn ends with 0 points and you get an AFK warning. After 2 warnings, AI takes over that player.",
+          "Exit in multiplayer forfeits the game while the game is active.",
+          "Chat is in the lower panel and works while you are in a multiplayer room."
+        ]
+      },
+      sr: {}
+    };
+    i18n.sr = {
+      ...i18n.en,
+      langButton: "RS",
+      soundOn: "Zvuk ukljucen",
+      soundOff: "Zvuk iskljucen",
+      chooseGame: "Izaberi partiju",
+      yourName: "Tvoje ime",
+      vsAi: "Protiv AI",
+      startGame: "Pokreni igru",
+      createJoinRoom: "Napravi ili udji u sobu",
+      roomName: "Ime sobe",
+      players: "Igraci",
+      createRoom: "Napravi sobu",
+      findRoom: "Pronadji sobu",
+      roomCode: "Kod sobe",
+      join: "Udji",
+      lobbyHelp: "Napravi sobu ili unesi kod koji ti je poslao drugi igrac.",
+      newGame: "Nova partija",
+      rules: "Pravila",
+      howTo: "Kako se igra",
+      exit: "Izlaz",
+      subtitleGame: "Farcle za 2-4 igraca",
+      version: "Verzija",
+      goal: "Cilj",
+      room: "Soba",
+      turn: "Na potezu: {name}",
+      round: "Runda",
+      selected: "Izabrano",
+      toRoll: "Za bacanje",
+      time: "Vreme",
+      roll: "Baci",
+      keepSelected: "Sacuvaj izabrano",
+      endTurn: "Zavrsi potez",
+      startMessage: "Baci 6 kockica da zapocnes potez.",
+      setDiceRoll: "Namesti bacanje",
+      exitTest: "Izadji iz testa",
+      history: "Istorija",
+      message: "Poruka",
+      send: "Posalji",
+      close: "Zatvori",
+      gameOver: "Kraj partije",
+      mpGameOver: "Multiplayer kraj",
+      lost: "Izgubljeno",
+      rematch: "Revans",
+      emptyHistory: "Jos nema odigranih poteza.",
+      noMessages: "Nema poruka.",
+      total: "Ukupno",
+      marks: "Crtice",
+      savedDice: "Sacuvane kockice",
+      waitingPlayer: "Ceka igraca {n}",
+      player: "Igrac {n}",
+      testMode: "Testing mode ACAB9: namesti bacanje preko admin dugmica.",
+      testApplied: "TEST: {label} ({values}).",
+      roomCreated: "Soba {code} je napravljena. Ceka igrace ({count}/{max}).",
+      waitStart: "Soba {code} ceka start ({count}/{max}).",
+      waitOther: "Soba {code}: cekas potez drugog igraca.",
+      otherJoined: "Drugi igrac je usao. Tvoj potez.",
+      roomStarted: "Partija je startovana.",
+      restored: "Vracen si u sobu {code}.",
+      finished: "Partija je zavrsena.",
+      restoring: "Vracam multiplayer sobu...",
+      restoreFailed: "Nije moguce vratiti prethodnu sobu.",
+      leftRoom: "Izasao si iz sobe.",
+      creatingRoom: "Pravim sobu...",
+      enterCode: "Unesi kod sobe.",
+      searchingRooms: "Trazim otvorene sobe...",
+      chooseRoom: "Izaberi sobu iz liste.",
+      noRooms: "Nema otvorenih soba.",
+      joiningRoom: "Ulazim u sobu...",
+      joinedRoom: "Usao si u sobu {code}. Ceka se start.",
+      testingStarted: "Testing mode ACAB9 je pokrenut protiv AI.",
+      roomPlayers: "{code} | {count}/{max} igraca",
+      invalidFirst: "Prvo sacuvaj izabrane kockice ili ih odznaci.",
+      allDiceBack: "Iskoristio si sve kockice, vraca se svih 6.",
+      chooseScoring: "Izaberi bodovne kockice koje hoces da sacuvas.",
+      invalidSelection: "Izabrane kockice nisu validna bodovna kombinacija.",
+      allSaved: "Sacuvao si sve kockice. Bacas ponovo svih 6.",
+      keptPoints: "Sacuvano {points} poena. Ostaje {remaining} kockica.",
+      minBank: "Za kraj poteza treba minimum {points} poena.",
+      mustRollAfterAll: "Posle svih 6 sacuvanih moras jos jednom da bacis i sacuvas bar jednu kockicu.",
+      banked: "{name} je upisao {points} poena.",
+      playerRolls: "{name} baca 6 kockica.",
+      kentaAuto: "Kenta se automatski upisuje. Bacas ponovo svih 6.",
+      pairsAuto: "Tri para se automatski upisuju. Bacas ponovo svih 6.",
+      winner: "{name} je pobedio sa {points} poena.",
+      winnerText: "{name} je pobedio sa {points} poena.",
+      loserText: "{name} je pobedio. Tvoj rezultat je {points}.",
+      noScoring: "{name} nema bodovnu kombinaciju.",
+      noMarksOver9000: " Preko 9000 nema crtica.",
+      threeMarks: " Tri crtice: -1000 poena.",
+      gotMark: " Dobijena crtica.",
+      farkleHistory: "{name}: Farkle",
+      bankHistory: "{name}: upisao potez",
+      timeoutDone: "Isteklo je 60 sekundi. Potez je zavrsen.",
+      rulesList: [
+        "Cilj je preci 10000 poena i ostati ispred kada ostali igraci zavrse odgovor.",
+        "U potezu bacas kockice, biras bodovne kockice, cuvas ih, pa odlucujes da li nastavljas ili upisujes poene.",
+        "Jedinica vredi 100 poena. Petica vredi 50 poena.",
+        "Tri jedinice vrede 1000. Tri iste od 2 do 6 vrede broj kockice puta 100.",
+        "Cetiri, pet i sest istih dupliraju vrednost grupe: na primer 3 dvojke su 200, 4 dvojke 400, 5 dvojki 800.",
+        "Kenta 1-2-3-4-5-6 vredi 1500 poena. Tri para vrede 750 poena.",
+        "Mozes sacuvati samo validnu bodovnu kombinaciju. Kockice koje nisu bodovne ne mogu same da se cuvaju.",
+        "Za zavrsetak poteza treba minimum 350 poena u toj rundi. Kada imas 9000 ili vise ukupno, minimum za upis je 1000.",
+        "Ako sacuvas svih 6 kockica, dobijas novo bacanje sa svih 6, ali moras jos jednom da bacis i sacuvas bar jednu kockicu pre upisa.",
+        "Ako bacanje nema nijednu bodovnu kockicu, to je Farkle: gubis poene iz trenutne runde i potez prelazi dalje.",
+        "Svaki Farkle daje crticu. Tri crtice skidaju 1000 poena. Uspesan upis poteza brise crtice.",
+        "Preko 9000 ukupnih poena nema crtica i ne skida se 1000 poena za Farkle.",
+        "Kada neko predje 10000, sledeci igrac dobija sansu da ga stigne ili prestigne. Ako ga stigne, igra se nastavlja i novi lider ceka odgovor.",
+        "Pobednik se proglasava tek kada igrac koji odgovara zavrsi potez i ostane iza trenutnog lidera."
+      ],
+      howList: [
+        "Klikni Baci. Posle bacanja klikni kockice koje zelis da sacuvas.",
+        "Bronzane kockice su pojedinacne jedinice ili petice. Zlatne kockice su grupe od tri ili vise istih.",
+        "Crvene kockice su trenutno izabrane. Klikni Sacuvaj izabrano da ih dodas u rundu.",
+        "Posle cuvanja biras: Baci ponovo za jos poena ili Zavrsi potez da upises rundu u ukupan skor.",
+        "Ne mozes da zavrsis potez dok runda nema bar 350 poena, odnosno 1000 ako si na 9000 ili vise ukupno.",
+        "Ako ne sacuvas izabrane kockice, ne mozes da bacas dalje. Prvo ih sacuvaj ili odznaci.",
+        "Ako iskoristis svih 6 kockica, tabla se prazni i sledece bacanje opet koristi svih 6 kockica.",
+        "U multiplayeru host pravi sobu, bira 2-4 igraca i salje kod. Ostali mogu da unesu kod ili kliknu Pronadji sobu.",
+        "Partija ne krece dok host ne klikne Start. Dok je soba u cekanju, timer ne istice.",
+        "U multiplayeru svaki aktivan potez ima 60 sekundi. Timer se resetuje kada sacuvas kockice ili kada potez predje na sledeceg igraca.",
+        "Ako vreme istekne, potez se zavrsava sa 0 poena i dobijas AFK opomenu. Posle 2 AFK opomene AI preuzima tog igraca.",
+        "Dugme Izlaz u multiplayeru znaci predaju partije dok partija traje.",
+        "Chat je u donjem panelu i radi dok si u multiplayer sobi."
+      ]
+    };
+    const testingRoomCode = "ACAB9";
+    const testCombinations = buildTestCombinations();
     const soundsPath = "assets/sounds/";
     const sounds = {
       roll: new Audio(soundsPath + "dice-roll.mp3"),
@@ -113,6 +390,89 @@ const modeScreen = document.getElementById("modeScreen");
     let syncChain = Promise.resolve();
     let audioUnlocked = false;
     let soundsMuted = localStorage.getItem("farcleSoundsMuted") === "1";
+    let currentLang = localStorage.getItem("farcleLang") === "sr" ? "sr" : "en";
+    let isTestingMode = false;
+    let lastResultKey = "";
+
+    function t(key, params = {}) {
+      let value = i18n[currentLang][key] ?? i18n.en[key] ?? key;
+      for (const [name, replacement] of Object.entries(params)) {
+        value = String(value).replaceAll("{" + name + "}", String(replacement));
+      }
+      return value;
+    }
+
+    function setText(selector, value) {
+      const node = document.querySelector(selector);
+      if (node) node.textContent = value;
+    }
+
+    function setPlaceholder(selector, value) {
+      const node = document.querySelector(selector);
+      if (node) node.placeholder = value;
+    }
+
+    function renderRulesList(node, items) {
+      if (!node) return;
+      node.innerHTML = "";
+      for (const item of items) {
+        const row = document.createElement("div");
+        row.className = "rules-item";
+        const span = document.createElement("span");
+        span.textContent = item;
+        row.appendChild(span);
+        node.appendChild(row);
+      }
+    }
+
+    function applyLanguage() {
+      document.documentElement.lang = currentLang === "sr" ? "sr" : "en";
+      languageToggleButtons.forEach((button) => {
+        button.textContent = t("langButton");
+        button.title = currentLang === "sr" ? "Srpski" : "English";
+      });
+      setText(".mode-title h1", t("chooseGame"));
+      setPlaceholder("#playerNameInput", t("yourName"));
+      setText("#aiModeBtn span", t("vsAi"));
+      setText("#aiModeBtn strong", t("startGame"));
+      setText("#multiplayerModeBtn span", t("multiplayer"));
+      setText("#multiplayerModeBtn strong", t("createJoinRoom"));
+      setPlaceholder("#roomNameInput", t("roomName"));
+      setText(".select-box span", t("players"));
+      createRoomBtn.textContent = t("createRoom");
+      findRoomBtn.textContent = t("findRoom");
+      setPlaceholder("#roomCodeInput", t("roomCode"));
+      joinRoomBtn.textContent = t("join");
+      if (!gameMode) roomStatusText.textContent = t("lobbyHelp");
+      resetBtn.textContent = t("newGame");
+      rulesBtn.textContent = t("rules");
+      howToBtn.textContent = t("howTo");
+      leaveRoomBtn.textContent = t("exit");
+      setText(".top .subtitle", t("subtitleGame"));
+      setText(".version-badge span", t("version"));
+      setText(".goalbox span", t("goal"));
+      setText(".room-badge span", t("room"));
+      rollBtn.textContent = t("roll");
+      keepBtn.textContent = t("keepSelected");
+      bankBtn.textContent = t("endTurn");
+      setText(".test-panel-head strong", t("setDiceRoll"));
+      testExitBtn.textContent = t("exitTest");
+      setText(".panel h3", t("history"));
+      setText(".chat-panel h3", t("multiplayer") === "Multiplayer" ? "Chat" : "Chat");
+      setPlaceholder("#chatInput", t("message"));
+      setText(".chat-form button", t("send"));
+      infoModalClose.textContent = t("close");
+      renderRulesList(rulesModalContent, t("rulesList"));
+      renderRulesList(howToModalContent, t("howList"));
+      updateSoundToggleLabels();
+      renderAll();
+    }
+
+    function toggleLanguage() {
+      currentLang = currentLang === "en" ? "sr" : "en";
+      localStorage.setItem("farcleLang", currentLang);
+      applyLanguage();
+    }
 
     function rand(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -148,17 +508,17 @@ const modeScreen = document.getElementById("modeScreen");
       return cleaned || fallback;
     }
 
-    function getLobbyPlayerName(fallback = "Igrac") {
+    function getLobbyPlayerName(fallback = t("player", { n: "" }).trim()) {
       return cleanName(playerNameInput.value, fallback, 18);
     }
 
     function getLobbyRoomName() {
-      return cleanName(roomNameInput.value, "Farcle soba", 28);
+      return cleanName(roomNameInput.value, "Farcle room", 28);
     }
 
     function openInfoModal(kind) {
       const isHowTo = kind === "how";
-      infoModalTitle.textContent = isHowTo ? "Kako se igra" : "Pravila";
+      infoModalTitle.textContent = isHowTo ? t("howTo") : t("rules");
       rulesModalContent.hidden = isHowTo;
       howToModalContent.hidden = !isHowTo;
       infoModal.hidden = false;
@@ -169,10 +529,74 @@ const modeScreen = document.getElementById("modeScreen");
       infoModal.hidden = true;
     }
 
+    function closeResultModal() {
+      resultModal.hidden = true;
+    }
+
+    function getWinnerIndex() {
+      let winner = 0;
+      for (let index = 1; index < players.length; index += 1) {
+        if (players[index].score > players[winner].score) winner = index;
+      }
+      return winner;
+    }
+
+    function isLocalWinner(winnerIndex) {
+      if (gameMode === "ai") return winnerIndex === 0;
+      if (gameMode === "mp") return winnerIndex === playerIndex;
+      return true;
+    }
+
+    function renderResultScores() {
+      resultScores.innerHTML = "";
+      players
+        .map((player, index) => ({ player, index }))
+        .sort((a, b) => b.player.score - a.player.score)
+        .forEach((item, rank) => {
+          const row = document.createElement("div");
+          row.className = "result-score-row";
+          row.innerHTML =
+            "<span>" + (rank + 1) + ". " + item.player.name + "</span>" +
+            "<strong>" + item.player.score + "</strong>";
+          resultScores.appendChild(row);
+        });
+    }
+
+    function showResultModal(winnerIndex = getWinnerIndex()) {
+      if (!gameOver || !players[winnerIndex]) return;
+      const key = gameMode + ":" + winnerIndex + ":" + players.map((player) => player.score).join("-");
+      if (lastResultKey === key && !resultModal.hidden) return;
+      lastResultKey = key;
+
+      const won = isLocalWinner(winnerIndex);
+      const localIndex = gameMode === "mp" && playerIndex !== null ? playerIndex : 0;
+      const localScore = players[localIndex]?.score || 0;
+      resultKicker.textContent = gameMode === "mp" ? t("mpGameOver") : t("gameOver");
+      resultTitle.textContent = won ? t("victory") : t("lost");
+      resultText.textContent = won
+        ? t("winnerText", { name: players[winnerIndex].name, points: players[winnerIndex].score })
+        : t("loserText", { name: players[winnerIndex].name, points: localScore });
+      renderResultScores();
+
+      if (gameMode === "mp") {
+        resultPrimaryBtn.textContent = t("rematch");
+        resultSecondaryBtn.textContent = t("exit");
+      } else {
+        resultPrimaryBtn.textContent = t("newGame");
+        resultSecondaryBtn.textContent = "Exit game";
+      }
+
+      resultModal.hidden = false;
+      resultPrimaryBtn.focus();
+    }
+
     function updateSoundToggleLabels() {
-      const label = soundsMuted ? "Zvuk: iskljucen" : "Zvuk: ukljucen";
-      soundToggle.textContent = label;
-      soundToggle.classList.toggle("muted", soundsMuted);
+      const label = soundsMuted ? t("soundOff") : t("soundOn");
+      for (const button of soundToggleButtons) {
+        button.setAttribute("aria-label", label);
+        button.title = label;
+        button.classList.toggle("muted", soundsMuted);
+      }
     }
 
     function toggleSounds() {
@@ -223,6 +647,135 @@ const modeScreen = document.getElementById("modeScreen");
       sound.currentTime = 0;
       sound.muted = false;
       sound.play().catch(() => {});
+    }
+
+    function faceName(value) {
+      return ["", "jedinice", "dvojke", "trojke", "cetvorke", "petice", "sestice"][value] || String(value);
+    }
+
+    function repeatValue(value, count) {
+      return Array.from({ length: count }, () => value);
+    }
+
+    function padTestRoll(selection) {
+      const values = [...selection];
+      const counts = countMap(values.map((value) => ({ value })));
+      const fillers = [2, 3, 4, 6];
+      while (values.length < 6) {
+        const filler = fillers.find((value) => (counts.get(value) || 0) < 2) || 2;
+        values.push(filler);
+        counts.set(filler, (counts.get(filler) || 0) + 1);
+      }
+      return values.slice(0, 6);
+    }
+
+    function makeTestCombo(label, selection, note = null, exactRoll = false) {
+      const selectedValues = [...selection];
+      const values = exactRoll ? [...selection] : padTestRoll(selectedValues);
+      const result = scoreSelection(selectedValues.map((value) => ({ value })));
+      return {
+        label,
+        values,
+        selectedValues,
+        note: note || (result.valid ? result.points + " points" : "No points")
+      };
+    }
+
+    function buildTestCombinations() {
+      const combos = [
+        { label: "Farkle", values: [2, 2, 3, 3, 4, 6], selectedValues: [], note: "No points" },
+        makeTestCombo("Straight", [1, 2, 3, 4, 5, 6], "1500 points", true)
+      ];
+
+      for (let count = 1; count <= 2; count += 1) {
+        combos.push(makeTestCombo(count + "x 1", repeatValue(1, count)));
+        combos.push(makeTestCombo(count + "x 5", repeatValue(5, count)));
+      }
+
+      for (let value = 1; value <= 6; value += 1) {
+        for (let count = 3; count <= 6; count += 1) {
+          combos.push(makeTestCombo(count + "x " + faceName(value), repeatValue(value, count), null, count === 6));
+        }
+      }
+
+      for (let a = 1; a <= 4; a += 1) {
+        for (let b = a + 1; b <= 5; b += 1) {
+          for (let c = b + 1; c <= 6; c += 1) {
+            combos.push(makeTestCombo("Three pairs " + a + "-" + b + "-" + c, [a, a, b, b, c, c], "750 points", true));
+          }
+        }
+      }
+
+      for (let a = 1; a <= 5; a += 1) {
+        for (let b = a + 1; b <= 6; b += 1) {
+          combos.push(makeTestCombo("Two triples " + a + "-" + b, [...repeatValue(a, 3), ...repeatValue(b, 3)], null, true));
+        }
+      }
+
+      for (let value = 1; value <= 6; value += 1) {
+        combos.push(makeTestCombo("3x " + value + " + 1", [...repeatValue(value, 3), 1]));
+        combos.push(makeTestCombo("3x " + value + " + 5", [...repeatValue(value, 3), 5]));
+        combos.push(makeTestCombo("3x " + value + " + 1 + 5", [...repeatValue(value, 3), 1, 5]));
+        combos.push(makeTestCombo("4x " + value + " + 1", [...repeatValue(value, 4), 1]));
+        combos.push(makeTestCombo("4x " + value + " + 5", [...repeatValue(value, 4), 5]));
+      }
+
+      combos.push(makeTestCombo("Samo singlovi 1/5", [1, 1, 5, 5]));
+      combos.push(makeTestCombo("Pun roll 1 i 5", [1, 1, 1, 5, 5, 5], null, true));
+      return combos;
+    }
+
+    function renderTestPanel() {
+      testPanel.hidden = !isTestingMode;
+      if (!isTestingMode || testGrid.children.length) return;
+
+      for (const combo of testCombinations) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "test-combo";
+        button.innerHTML = "<strong>" + combo.label + "</strong><span>" + combo.values.join(" ") + " | " + combo.note + "</span>";
+        button.addEventListener("click", () => applyTestCombination(combo));
+        testGrid.appendChild(button);
+      }
+    }
+
+    function applyTestCombination(combo) {
+      if (!isTestingMode || gameMode !== "ai" || currentPlayer !== 0 || gameOver) return;
+      clearAiTimer();
+      clearRollFaceTimer();
+      isRolling = false;
+      turnStarted = true;
+      hasRolled = true;
+      mustKeepAfterFullReset = false;
+      mustKeepFromCurrentRoll = true;
+      keepableIds = new Map();
+      const selectedCounts = countMap((combo.selectedValues || []).map((value) => ({ value })));
+      dice = combo.values.map((value) => {
+        const die = createDie(value);
+        const remaining = selectedCounts.get(value) || 0;
+        if (remaining > 0) {
+          die.selected = true;
+          selectedCounts.set(value, remaining - 1);
+        }
+        return die;
+      });
+      const result = scoreSelection(dice);
+      if (result.special) {
+        for (const die of dice) die.special = true;
+      }
+      setMessage(t("testApplied", { label: combo.label, values: combo.values.join(", ") }));
+      resetTurnDeadline();
+      startTurnTimer();
+      renderAll();
+      if (!hasAnyScoringDice(dice)) {
+        setTimeout(() => {
+          if (isTestingMode && gameMode === "ai" && currentPlayer === 0 && !gameOver) endTurnAfterFarkle();
+        }, 350);
+      } else if (result.special) {
+        setTimeout(() => {
+          if (isTestingMode && gameMode === "ai" && currentPlayer === 0 && !gameOver) autoKeepSpecial(result);
+        }, 500);
+      }
     }
 
     function countMap(diceList) {
@@ -297,7 +850,7 @@ const modeScreen = document.getElementById("modeScreen");
 
     function createPlayer(index, name = null) {
       return {
-        name: name || ("Igrac " + (index + 1)),
+        name: name || t("player", { n: index + 1 }),
         score: 0,
         strikes: 0,
         timeoutStrikes: 0,
@@ -364,26 +917,26 @@ const modeScreen = document.getElementById("modeScreen");
       head.className = "player-card-head";
 
       const title = document.createElement("h2");
-      title.textContent = player.name + (player.aiControlled ? " (AI)" : "");
+      title.textContent = player.name + (player.aiControlled ? " (" + t("ai") + ")" : "");
       head.appendChild(title);
 
       const scoreBox = document.createElement("div");
       scoreBox.className = "player-score-box";
-      scoreBox.innerHTML = "<span>Ukupno</span><strong>" + player.score + "</strong>";
+      scoreBox.innerHTML = "<span>" + t("total") + "</span><strong>" + player.score + "</strong>";
       head.appendChild(scoreBox);
       card.appendChild(head);
 
       const stats = document.createElement("div");
       stats.className = "player-stats";
       stats.innerHTML =
-        "<div><span>Crtice</span><strong class=\"strike-marks\">" + (player.strikes > 0 ? "/".repeat(player.strikes) : "") + "</strong></div>" +
+        "<div><span>" + t("marks") + "</span><strong class=\"strike-marks\">" + (player.strikes > 0 ? "/".repeat(player.strikes) : "") + "</strong></div>" +
         "<div><span>AFK</span><strong>" + (player.timeoutStrikes || 0) + "/2</strong></div>";
       card.appendChild(stats);
 
       const savedArea = document.createElement("div");
       savedArea.className = "saved-area";
       const savedLabel = document.createElement("span");
-      savedLabel.textContent = "Sacuvane kockice";
+      savedLabel.textContent = t("savedDice");
       const savedWrap = document.createElement("div");
       savedWrap.className = "saved-dice";
       for (const value of savedDiceValues[index] || []) {
@@ -470,7 +1023,7 @@ const modeScreen = document.getElementById("modeScreen");
       if (history.length === 0) {
         const row = document.createElement("div");
         row.className = "history-item";
-        row.innerHTML = "<span>Jos nema odigranih poteza.</span><strong>0</strong>";
+        row.innerHTML = "<span>" + t("emptyHistory") + "</span><strong>0</strong>";
         historyList.appendChild(row);
         return;
       }
@@ -491,7 +1044,7 @@ const modeScreen = document.getElementById("modeScreen");
       });
       if (gameMode === "mp" && roomStatus === "waiting") {
         for (let index = players.length; index < maxPlayers; index += 1) {
-          playersList.appendChild(buildPlayerCard(createPlayer(index, "Ceka igraca " + (index + 1)), index));
+          playersList.appendChild(buildPlayerCard(createPlayer(index, t("waitingPlayer", { n: index + 1 })), index));
         }
       }
     }
@@ -503,7 +1056,7 @@ const modeScreen = document.getElementById("modeScreen");
       if (visibleMessages.length === 0) {
         const row = document.createElement("div");
         row.className = "chat-item";
-        row.textContent = "Nema poruka.";
+        row.textContent = t("noMessages");
         chatList.appendChild(row);
         return;
       }
@@ -512,7 +1065,7 @@ const modeScreen = document.getElementById("modeScreen");
         const row = document.createElement("div");
         row.className = "chat-item";
         const name = document.createElement("strong");
-        name.textContent = item.name || "Igrac";
+        name.textContent = item.name || t("player", { n: "" }).trim();
         const text = document.createElement("span");
         text.textContent = item.text || "";
         row.appendChild(name);
@@ -529,20 +1082,23 @@ const modeScreen = document.getElementById("modeScreen");
     }
 
     function updateTurnTimerDisplay() {
-      turnTimerEl.textContent = String(getTurnSecondsLeft());
+      const node = document.getElementById("turnTimer");
+      if (node) node.textContent = String(getTurnSecondsLeft());
     }
 
     function updateSelectedPoints() {
       const result = scoreSelection(getSelectedDice());
-      selectedPointsEl.textContent = result.valid ? String(result.points) : "0";
+      const node = document.getElementById("selectedPoints");
+      if (node) node.textContent = result.valid ? String(result.points) : "0";
     }
 
     function renderStatus() {
-      turnText.textContent = "Na potezu: " + players[currentPlayer].name;
-      turnPointsEl.textContent = String(turnPoints);
-      diceLeftEl.textContent = String(getActiveDice().length || 6);
-      updateTurnTimerDisplay();
-      updateSelectedPoints();
+      turnText.textContent = t("turn", { name: players[currentPlayer].name });
+      statusMeta.innerHTML =
+        t("round") + ': <strong id="turnPoints">' + turnPoints + '</strong> | ' +
+        t("selected") + ': <strong id="selectedPoints">' + (scoreSelection(getSelectedDice()).valid ? scoreSelection(getSelectedDice()).points : 0) + '</strong> | ' +
+        t("toRoll") + ': <strong id="diceLeft">' + (getActiveDice().length || 6) + '</strong> | ' +
+        t("time") + ': <strong id="turnTimer">' + getTurnSecondsLeft() + '</strong>s';
       const isAiTurn = shouldAiControlCurrentTurn();
       const isRemoteTurn = gameMode === "mp" && !isLocalPlayersTurn();
       const requiredBankPoints = getRequiredBankPoints();
@@ -557,6 +1113,7 @@ const modeScreen = document.getElementById("modeScreen");
       renderStatus();
       renderHistory();
       renderChat();
+      renderTestPanel();
     }
 
     function newTurn() {
@@ -574,7 +1131,7 @@ const modeScreen = document.getElementById("modeScreen");
       savedDiceValues[currentPlayer] = [];
       dice = Array.from({ length: 6 }, () => createDie(1));
       clearSelections();
-      setMessage(players[currentPlayer].name + " baca 6 kockica.");
+      setMessage(t("playerRolls", { name: players[currentPlayer].name }));
       renderAll();
       startTurnTimer();
       scheduleAiTurn();
@@ -657,10 +1214,10 @@ const modeScreen = document.getElementById("modeScreen");
 
       if (result.special === "kenta") {
         showSpecialBanner("Kenta! 1500");
-        setMessage("Kenta se automatski upisuje. Bacas ponovo svih 6.");
+        setMessage(t("kentaAuto"));
       } else if (result.special === "parovi") {
         showSpecialBanner("Tri para! 750");
-        setMessage("Tri para se automatski upisuju. Bacas ponovo svih 6.");
+        setMessage(t("pairsAuto"));
       }
 
       resetTurnDeadline();
@@ -686,16 +1243,16 @@ const modeScreen = document.getElementById("modeScreen");
     function applyStrike(player) {
       if (player.score >= highScoreThreshold) {
         player.strikes = 0;
-        return "Preko 9000 nema crtica.";
+        return t("noMarksOver9000");
       }
 
       player.strikes += 1;
       if (player.strikes >= 3) {
         player.score -= 1000;
         player.strikes = 0;
-        return "Tri crtice: -1000 poena.";
+        return t("threeMarks");
       }
-      return "Dobijena crtica.";
+      return t("gotMark");
     }
 
     function inferFinishLeaderIndex(state = null) {
@@ -743,8 +1300,9 @@ const modeScreen = document.getElementById("modeScreen");
       finishLeaderIndex = null;
       clearAiTimer();
       clearTurnTimer();
-      setMessage(players[winnerIndex].name + " je pobedio sa " + players[winnerIndex].score + " poena.");
+      setMessage(t("winner", { name: players[winnerIndex].name, points: players[winnerIndex].score }));
       renderAll();
+      showResultModal(winnerIndex);
       syncMultiplayerState("turn");
     }
 
@@ -754,8 +1312,8 @@ const modeScreen = document.getElementById("modeScreen");
       playSound(getActiveDice().length === 6 ? "manualFarcle" : "farcle");
       const player = players[currentPlayer];
       const strikeText = " " + applyStrike(player);
-      recordHistory(player.name + ": Farkle", 0);
-      setMessage(player.name + " nema bodovnu kombinaciju." + strikeText);
+      recordHistory(t("farkleHistory", { name: player.name }), 0);
+      setMessage(t("noScoring", { name: player.name }) + strikeText);
       turnPoints = 0;
       mustKeepAfterFullReset = false;
       mustKeepFromCurrentRoll = false;
@@ -786,7 +1344,7 @@ const modeScreen = document.getElementById("modeScreen");
       if (getSelectedDice().length > 0) {
         isRolling = false;
         renderStatus();
-        setMessage("Prvo sacuvaj izabrane kockice ili ih odznaci.");
+        setMessage(t("invalidFirst"));
         return;
       }
       const token = turnToken;
@@ -795,7 +1353,7 @@ const modeScreen = document.getElementById("modeScreen");
       if (activeDice.length === 0) {
         dice = Array.from({ length: 6 }, () => createDie(1));
         activeDice = getActiveDice();
-        setMessage("Iskoristio si sve kockice, vraca se svih 6.");
+        setMessage(t("allDiceBack"));
       }
 
       for (const die of activeDice) {
@@ -856,7 +1414,7 @@ const modeScreen = document.getElementById("modeScreen");
 
         mustKeepFromCurrentRoll = true;
         renderStatus();
-        setMessage("Izaberi bodovne kockice koje hoces da sacuvas.");
+        setMessage(t("chooseScoring"));
         syncMultiplayerState("roll");
         scheduleAiTurn(aiPostRollSelectionDelay);
       }, rollResolveDelay);
@@ -877,7 +1435,7 @@ const modeScreen = document.getElementById("modeScreen");
       const selected = getSelectedDice();
       const result = scoreSelection(selected);
       if (!result.valid) {
-        setMessage("Izabrane kockice nisu validna bodovna kombinacija.");
+        setMessage(t("invalidSelection"));
         flashInvalidSelection();
         return;
       }
@@ -909,9 +1467,9 @@ const modeScreen = document.getElementById("modeScreen");
         dice = [];
         hasRolled = false;
         mustKeepAfterFullReset = true;
-        setMessage("Sacuvao si sve kockice. Bacas ponovo svih 6.");
+        setMessage(t("allSaved"));
       } else {
-        setMessage("Sacuvano " + result.points + " poena. Ostaje " + remaining + " kockica.");
+        setMessage(t("keptPoints", { points: result.points, remaining }));
       }
       resetTurnDeadline();
       startTurnTimer();
@@ -925,11 +1483,11 @@ const modeScreen = document.getElementById("modeScreen");
       const player = players[currentPlayer];
       const requiredBankPoints = getRequiredBankPoints(player);
       if (turnPoints < requiredBankPoints) {
-        setMessage("Za kraj poteza treba minimum " + requiredBankPoints + " poena.");
+        setMessage(t("minBank", { points: requiredBankPoints }));
         return;
       }
       if (mustKeepAfterFullReset) {
-        setMessage("Posle svih 6 sacuvanih moras jos jednom da bacis i sacuvas bar jednu kockicu.");
+        setMessage(t("mustRollAfterAll"));
         return;
       }
 
@@ -939,7 +1497,7 @@ const modeScreen = document.getElementById("modeScreen");
       player.score += banked;
       player.strikes = 0;
       savedDiceValues[currentPlayer] = [];
-      recordHistory(player.name + ": upisao potez", banked);
+      recordHistory(t("bankHistory", { name: player.name }), banked);
 
       const winnerIndex = getWinnerAfterCompletedTurn(endedPlayerIndex);
       if (winnerIndex !== null) {
@@ -947,13 +1505,15 @@ const modeScreen = document.getElementById("modeScreen");
         return;
       }
 
-      setMessage(player.name + " je upisao " + banked + " poena.");
+      setMessage(t("banked", { name: player.name, points: banked }));
       renderPlayers();
       nextPlayer();
       syncMultiplayerState("turn");
     }
 
     function resetGame() {
+      closeResultModal();
+      lastResultKey = "";
       clearAiTimer();
       clearRollFaceTimer();
       clearTurnTimer();
@@ -1020,7 +1580,7 @@ const modeScreen = document.getElementById("modeScreen");
       maxPlayers = Math.max(Number(state.maxPlayers || incomingPlayers.length || maxPlayers), incomingPlayers.length);
       roomName = String(state.roomName || roomName || "");
       players = incomingPlayers.map((player, index) => ({
-        name: player?.name || ("Igrac " + (index + 1)),
+        name: player?.name || t("player", { n: index + 1 }),
         score: Number(player?.score || 0),
         strikes: Number(player?.strikes || 0),
         timeoutStrikes: Number(player?.timeoutStrikes || 0),
@@ -1031,7 +1591,7 @@ const modeScreen = document.getElementById("modeScreen");
         Array.isArray(state.savedDiceValues?.[index]) ? [...state.savedDiceValues[index]] : []
       ));
       chatMessages = Array.isArray(state.chatMessages) ? state.chatMessages.map((item) => ({
-        name: String(item.name || "Igrac"),
+        name: String(item.name || t("player", { n: "" }).trim()),
         text: String(item.text || ""),
         at: Number(item.at || 0)
       })) : [];
@@ -1063,6 +1623,11 @@ const modeScreen = document.getElementById("modeScreen");
       startTurnTimer();
       scheduleAiTurn();
       updateRoomUi();
+      if (gameOver) {
+        showResultModal(getWinnerIndex());
+      } else {
+        closeResultModal();
+      }
       isApplyingRemoteState = false;
     }
 
@@ -1106,8 +1671,8 @@ const modeScreen = document.getElementById("modeScreen");
     function updateRoomUi() {
       roomBadge.hidden = gameMode !== "mp" || !roomCode;
       roomCodeText.textContent = roomCode || "-----";
-      leaveRoomBtn.hidden = gameMode !== "mp" || !roomCode;
-      leaveRoomBtn.disabled = gameMode !== "mp" || !roomCode;
+      leaveRoomBtn.hidden = gameMode !== "ai" && (gameMode !== "mp" || !roomCode);
+      leaveRoomBtn.disabled = gameMode !== "ai" && (gameMode !== "mp" || !roomCode);
       startRoomBtn.hidden = gameMode !== "mp" || !roomCode || playerIndex !== 0 || roomStatus !== "waiting" || gameOver;
       startRoomBtn.disabled = players.length < 2;
       chatPanel.hidden = gameMode !== "mp";
@@ -1171,13 +1736,13 @@ const modeScreen = document.getElementById("modeScreen");
         }
 
         if (roomStatus === "waiting") {
-          setMessage("Soba " + roomCode + " ceka start (" + players.length + "/" + maxPlayers + ").");
+          setMessage(t("waitStart", { code: roomCode, count: players.length, max: maxPlayers }));
         } else if (gameOver) {
           updateRoomUi();
         } else if (!gameOver && playerIndex !== currentPlayer) {
-          setMessage("Soba " + roomCode + ": cekas potez drugog igraca.");
-        } else if (!gameOver && messageText.textContent.includes("ceka drugog")) {
-          setMessage("Drugi igrac je usao. Tvoj potez.");
+          setMessage(t("waitOther", { code: roomCode }));
+        } else if (!gameOver && (messageText.textContent.includes("waiting") || messageText.textContent.includes("ceka"))) {
+          setMessage(t("otherJoined"));
         }
       } catch (error) {
         setRoomStatus(error.message);
@@ -1208,7 +1773,7 @@ const modeScreen = document.getElementById("modeScreen");
           roomVersion = nextVersion || roomVersion;
           lastRoomUpdatedAt = data.updatedAt || lastRoomUpdatedAt;
           applyStateSnapshot(data.state);
-          setMessage("Isteklo je 60 sekundi. Potez je zavrsen.");
+          setMessage(t("timeoutDone"));
         }
       } catch (error) {
         setRoomStatus(error.message);
@@ -1225,7 +1790,7 @@ const modeScreen = document.getElementById("modeScreen");
         const session = JSON.parse(rawSession);
         if (!session.roomCode || !session.playerToken) return;
 
-        roomStatusText.textContent = "Vracam multiplayer sobu...";
+        roomStatusText.textContent = t("restoring");
         const query = "?code=" + encodeURIComponent(session.roomCode) + "&token=" + encodeURIComponent(session.playerToken);
         const data = await apiRequest("get_state.php" + query);
         roomCode = data.code;
@@ -1237,11 +1802,11 @@ const modeScreen = document.getElementById("modeScreen");
         gameMode = "mp";
         showGame("mp");
         applyStateSnapshot(data.state);
-        setRoomStatus(gameOver ? "Partija je zavrsena." : "Vracen si u sobu " + roomCode + ".");
+        setRoomStatus(gameOver ? t("finished") : t("restored", { code: roomCode }));
         startPolling();
       } catch (error) {
         clearMultiplayerSession();
-        roomStatusText.textContent = "Nije moguce vratiti prethodnu sobu.";
+        roomStatusText.textContent = t("restoreFailed");
       }
     }
 
@@ -1252,7 +1817,7 @@ const modeScreen = document.getElementById("modeScreen");
         showModeScreenAfterLeave();
         return;
       }
-      const confirmed = window.confirm("Izlaz iz multiplayera znaci predaju partije. Nastaviti?");
+      const confirmed = window.confirm(currentLang === "sr" ? "Izlaz iz multiplayera znaci predaju partije. Nastaviti?" : "Leaving multiplayer forfeits the game. Continue?");
       if (!confirmed) return;
 
       leaveRoomBtn.disabled = true;
@@ -1274,6 +1839,14 @@ const modeScreen = document.getElementById("modeScreen");
       }
     }
 
+    function handleLeaveGame() {
+      if (gameMode === "ai") {
+        exitCurrentGame();
+        return;
+      }
+      leaveMultiplayerRoom();
+    }
+
     async function startMultiplayerRoom() {
       if (gameMode !== "mp" || !roomCode || !playerToken || playerIndex !== 0 || roomStatus !== "waiting") return;
       startRoomBtn.disabled = true;
@@ -1286,7 +1859,7 @@ const modeScreen = document.getElementById("modeScreen");
         roomVersion = Number(data.version || roomVersion);
         lastRoomUpdatedAt = data.updatedAt || lastRoomUpdatedAt;
         applyStateSnapshot(data.state);
-        setRoomStatus("Partija je startovana.");
+        setRoomStatus(t("roomStarted"));
       } catch (error) {
         setRoomStatus(error.message);
       } finally {
@@ -1321,7 +1894,7 @@ const modeScreen = document.getElementById("modeScreen");
       if (!rooms.length) {
         const empty = document.createElement("div");
         empty.className = "room-result empty";
-        empty.textContent = "Nema otvorenih soba.";
+        empty.textContent = t("noRooms");
         roomResults.appendChild(empty);
         return;
       }
@@ -1334,11 +1907,11 @@ const modeScreen = document.getElementById("modeScreen");
 
         const title = document.createElement("span");
         title.className = "room-result-title";
-        title.textContent = room.name || ("Soba " + room.code);
+        title.textContent = room.name || (t("room") + " " + room.code);
 
         const meta = document.createElement("span");
         meta.className = "room-result-meta";
-        meta.textContent = room.code + " | " + room.playerCount + "/" + room.maxPlayers + " igraca";
+        meta.textContent = t("roomPlayers", { code: room.code, count: room.playerCount, max: room.maxPlayers });
 
         row.appendChild(title);
         row.appendChild(meta);
@@ -1518,11 +2091,12 @@ const modeScreen = document.getElementById("modeScreen");
       updateRoomUi();
     }
 
-    function showModeScreenAfterLeave() {
+    function showModeScreenAfterLeave(message = t("leftRoom")) {
       clearPollTimer();
       clearAiTimer();
       clearRollFaceTimer();
       clearTurnTimer();
+      closeResultModal();
       gameMode = null;
       roomCode = null;
       roomName = "";
@@ -1532,18 +2106,22 @@ const modeScreen = document.getElementById("modeScreen");
       lastRoomUpdatedAt = null;
       roomVersion = 0;
       isResolvingTimeout = false;
+      isTestingMode = false;
       maxPlayers = 2;
       chatMessages = [];
       modeScreen.hidden = false;
       gameApp.hidden = true;
       mpPanel.hidden = false;
-      roomStatusText.textContent = "Izasao si iz sobe. Partija je predata.";
+      roomStatusText.textContent = message;
       updateRoomUi();
+      renderTestPanel();
     }
 
     function startGame(mode) {
       clearPollTimer();
       clearMultiplayerSession();
+      closeResultModal();
+      isTestingMode = false;
       roomCode = null;
       roomName = "";
       playerToken = null;
@@ -1558,18 +2136,57 @@ const modeScreen = document.getElementById("modeScreen");
       resetGame();
     }
 
+    function startTestingMode() {
+      closeResultModal();
+      clearPollTimer();
+      clearMultiplayerSession();
+      isTestingMode = true;
+      roomCode = null;
+      roomName = "Testing " + testingRoomCode;
+      playerToken = null;
+      playerIndex = null;
+      roomStatus = null;
+      lastRoomUpdatedAt = null;
+      roomVersion = 0;
+      setPlayerCount(2, true);
+      players[0].name = getLobbyPlayerName("Admin");
+      showGame("ai");
+      resetGame();
+      isTestingMode = true;
+      renderTestPanel();
+      setMessage(t("testMode"));
+    }
+
+    function exitCurrentGame() {
+      if (gameMode === "mp") {
+        clearMultiplayerSession();
+        showModeScreenAfterLeave(t("leftRoom"));
+        return;
+      }
+      clearAiTimer();
+      clearRollFaceTimer();
+      clearTurnTimer();
+      closeResultModal();
+      isTestingMode = false;
+      gameMode = null;
+      modeScreen.hidden = false;
+      gameApp.hidden = true;
+      mpPanel.hidden = true;
+      renderTestPanel();
+    }
+
     async function createMultiplayerRoom() {
       createRoomBtn.disabled = true;
       joinRoomBtn.disabled = true;
       findRoomBtn.disabled = true;
       roomResults.hidden = true;
-      roomStatusText.textContent = "Pravim sobu...";
+      roomStatusText.textContent = t("creatingRoom");
 
       try {
         gameMode = "mp";
         maxPlayers = Math.max(2, Math.min(4, Number(maxPlayersSelect.value || 4)));
         roomName = getLobbyRoomName();
-        players = [createPlayer(0, getLobbyPlayerName("Igrac 1"))];
+        players = [createPlayer(0, getLobbyPlayerName(t("player", { n: 1 })))];
         savedDiceValues = [[]];
         chatMessages = [];
         resetGame();
@@ -1577,7 +2194,7 @@ const modeScreen = document.getElementById("modeScreen");
           state: buildStateSnapshot(),
           maxPlayers,
           roomName: getLobbyRoomName(),
-          playerName: getLobbyPlayerName("Igrac 1")
+          playerName: getLobbyPlayerName(t("player", { n: 1 }))
         });
         roomCode = data.code;
         roomName = data.state?.roomName || roomName;
@@ -1589,7 +2206,7 @@ const modeScreen = document.getElementById("modeScreen");
         storeMultiplayerSession();
         showGame("mp");
         applyStateSnapshot(data.state);
-        setRoomStatus("Soba " + roomCode + " je napravljena. Ceka igrace (" + players.length + "/" + maxPlayers + ").");
+        setRoomStatus(t("roomCreated", { code: roomCode, count: players.length, max: maxPlayers }));
         startPolling();
       } catch (error) {
         gameMode = null;
@@ -1604,7 +2221,7 @@ const modeScreen = document.getElementById("modeScreen");
     async function joinMultiplayerRoom() {
       const code = roomCodeInput.value.trim().toUpperCase();
       if (!code) {
-        roomStatusText.textContent = "Unesi kod sobe.";
+        roomStatusText.textContent = t("enterCode");
         return;
       }
       await enterMultiplayerRoom(code);
@@ -1614,12 +2231,12 @@ const modeScreen = document.getElementById("modeScreen");
       createRoomBtn.disabled = true;
       joinRoomBtn.disabled = true;
       findRoomBtn.disabled = true;
-      roomStatusText.textContent = "Trazim otvorene sobe...";
+      roomStatusText.textContent = t("searchingRooms");
 
       try {
         const data = await apiRequest("list_rooms.php");
         renderRoomResults(data.rooms || []);
-        roomStatusText.textContent = (data.rooms || []).length ? "Izaberi sobu iz liste." : "Nema otvorenih soba.";
+        roomStatusText.textContent = (data.rooms || []).length ? t("chooseRoom") : t("noRooms");
       } catch (error) {
         roomResults.hidden = true;
         roomStatusText.textContent = error.message;
@@ -1632,16 +2249,22 @@ const modeScreen = document.getElementById("modeScreen");
 
     async function enterMultiplayerRoom(code) {
       if (code === null) code = "";
+      code = String(code).trim().toUpperCase();
+      if (code === testingRoomCode) {
+        startTestingMode();
+        roomStatusText.textContent = t("testingStarted");
+        return;
+      }
       createRoomBtn.disabled = true;
       joinRoomBtn.disabled = true;
       findRoomBtn.disabled = true;
       roomResults.hidden = true;
-      roomStatusText.textContent = "Ulazim u sobu...";
+      roomStatusText.textContent = t("joiningRoom");
 
       try {
         const data = await apiRequest("join_room.php", {
           code,
-          playerName: getLobbyPlayerName("Igrac")
+          playerName: getLobbyPlayerName(t("player", { n: "" }).trim())
         });
         roomCode = data.code;
         roomName = data.state?.roomName || "";
@@ -1654,7 +2277,7 @@ const modeScreen = document.getElementById("modeScreen");
         storeMultiplayerSession();
         showGame("mp");
         applyStateSnapshot(data.state);
-        setRoomStatus("Usao si u sobu " + roomCode + ". Ceka se start.");
+        setRoomStatus(t("joinedRoom", { code: roomCode }));
         startPolling();
       } catch (error) {
         roomStatusText.textContent = error.message;
@@ -1682,7 +2305,8 @@ const modeScreen = document.getElementById("modeScreen");
     infoModal.addEventListener("click", (event) => {
       if (event.target === infoModal) closeInfoModal();
     });
-    soundToggle.addEventListener("click", toggleSounds);
+    soundToggleButtons.forEach((button) => button.addEventListener("click", toggleSounds));
+    languageToggleButtons.forEach((button) => button.addEventListener("click", toggleLanguage));
     roomCodeInput.addEventListener("input", () => {
       roomCodeInput.value = roomCodeInput.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
     });
@@ -1698,7 +2322,16 @@ const modeScreen = document.getElementById("modeScreen");
     keepBtn.addEventListener("click", keepSelectedDice);
     bankBtn.addEventListener("click", bankPoints);
     resetBtn.addEventListener("click", resetGame);
-    leaveRoomBtn.addEventListener("click", leaveMultiplayerRoom);
+    leaveRoomBtn.addEventListener("click", handleLeaveGame);
+    resultPrimaryBtn.addEventListener("click", () => {
+      closeResultModal();
+      if (gameMode === "mp") {
+        roomStatus = "active";
+      }
+      resetGame();
+    });
+    resultSecondaryBtn.addEventListener("click", exitCurrentGame);
+    testExitBtn.addEventListener("click", exitCurrentGame);
 
     window.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !infoModal.hidden) {
@@ -1718,4 +2351,5 @@ const modeScreen = document.getElementById("modeScreen");
 
     restoreMultiplayerSession();
     updateSoundToggleLabels();
+    applyLanguage();
     appVersionText.textContent = appVersion;
